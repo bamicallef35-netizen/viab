@@ -14,7 +14,7 @@ The result is open-ended. Unlike a blueprint, there is no target form; the struc
 
 **The mechanism is real robotics.** Werfel, Petersen and Nagpal's TERMES system (*Designing Collective Behavior in a Termite-Inspired Robot Construction Team*, *Science*, 2014) showed a team of climbing robots build towers and castles from foam bricks using only local sensing, with no supervisor and no communication between robots — coordination entirely through the shared structure. One honest nuance matters: TERMES is **not** blueprint-free. A user specifies a target structure offline, and a compiler turns it into the local rules that guarantee it. What TERMES removes is the *runtime* foreman, not the plan. This sim drops the target as well: there is no structure to reach, so the growth is genuinely open.
 
-**The concept is speculative architecture.** R&Sie(n) (François Roche, Stéphanie Lavaux and collaborators) staged *I've heard about…* at the Musée d'Art Moderne de la Ville de Paris / ARC in 2005, and *Une architecture des humeurs* at Le Laboratoire, Paris, in 2010. These were **unbuilt, exhibited** projects — models, machines, drawings, a manifesto — proposing a city that grows by "local accretion … not planned in advance," "taking into account viability, i.e. all the varieties of structural constraint," with a "Viab" that reads inhabitants' chemical states. Two honesty notes: R&Sie(n)'s own Viab was imagined as a single large secretion-and-sintering machine (modelled on contour crafting), **not** a decentralized robot swarm — their "swarm intelligence" is a metaphor for citizens as networked political agents. And the humours are a conceptual input that *affects* the construction logic; they are not a validated pipeline from biochemistry to building.
+**The concept is speculative architecture.** R&Sie(n) (François Roche, Stéphanie Lavaux, Jean Navarro, with Benoît Durandin) staged *I've heard about…* for the Musée d'Art Moderne de la Ville de Paris / ARC at its temporary venue, the Couvent des Cordeliers, from 7 July to 9 October 2005, and *Une architecture des humeurs* at Le Laboratoire, Paris, from January 2010. These were **unbuilt, exhibited** projects — models, machines, films, a manifesto — proposing a city that grows by "local accretion … not planned in advance," "taking into account viability, i.e. all the varieties of structural constraint," with a Viab that reads inhabitants' speech and chemical signals. Two honesty notes: R&Sie(n)'s own Viab was proposed as a single building machine secreting fibre-reinforced concrete by a contour-crafting process (machines by Stephan Henrich; contour crafting after Behrokh Khoshnevis, USC) — **not** a decentralized robot swarm; their "swarm intelligence" is a figure for citizens as networked political agents. And the humours are a conceptual input that *affects* the construction logic; they are not a validated pipeline from biochemistry to building.
 
 ## What I borrowed, what I invented
 
@@ -48,6 +48,14 @@ The suite ([`test/`](test/)) pins: the support predicate and the exact cantileve
 
 This is a 2-D toy. "Support" is a combinatorial cantilever invariant, a proxy — not statics or finite-element analysis; a real build would need a centre-of-mass or moment check. The humours are a synthetic seeded signal, not real affect or sensor data. The model reproduces neither TERMES nor R&Sie(n); its rules, its humour coupling and its lattice are my own, inspired by both. It says nothing about deployable robots or real buildings.
 
+## Precedents, kept to what is verified
+
+"Viab" is R&Sie(n)'s name for the building machine of *I've heard about…* (2005). The Canadian Centre for Architecture's record of Viab02 (*Une architecture des humeurs*, 2010) glosses the name as viability + variability and describes a secretion-and-weaving machine extruding bio-cement, developed with the USC Robotics Research Lab. The name is borrowed with attribution; the deposition rules here follow TERMES.
+
+Olzweg (FRAC Centre extension competition, Orléans, 2006; joint laureate, the commission went to Jakob+MacFarlane) proposed a robot stacking recycled glass rods, placed by a dispersal script, in random mode over more than ten years, with the software managing the uncertainty of the final form. It is the closest R&Sie(n) precedent for building as an open-ended stacking procedure; this simulation tests one local deposition mechanism and nothing else.
+
+The *neighbourhood protocol* of *I've heard about…* and the deliberately uncertain protocols of *Une architecture des humeurs* are the sense in which this sim's rules are called protocols: local, iterated, with no target form. The Viab existed as prototypes and exhibition apparatus, not as a working robot; nothing here implements Roche.
+
 ## Extensions
 
 A 3-D lattice (closer to TERMES), a simplified statics check in place of the combinatorial proxy, and a mapping from the deposition rule to a real climbing-robot instruction set are the obvious next steps.
@@ -55,8 +63,9 @@ A 3-D lattice (closer to TERMES), a simplified statics check in place of the com
 ## Sources
 
 - J. Werfel, K. Petersen, R. Nagpal, "Designing Collective Behavior in a Termite-Inspired Robot Construction Team", *Science* 343 (2014) 754–758. [doi:10.1126/science.1245842](https://doi.org/10.1126/science.1245842)
-- R&Sie(n), *I've heard about…*, Musée d'Art Moderne de la Ville de Paris / ARC, 2005.
-- R&Sie(n), *Une architecture des humeurs*, Le Laboratoire, Paris, 2010.
+- R&Sie(n), *I've heard about…*, Musée d'Art Moderne de la Ville de Paris / ARC, at the Couvent des Cordeliers, 2005; catalogue Paris Musées, 2005; essay in *Log* 10, 2006.
+- R&Sie(n), *Une architecture des humeurs*, Le Laboratoire, Paris, 2010; Canadian Centre for Architecture, R&Sie(n) project records, fonds AP193.
+- R&Sie(n), Olzweg, FRAC Centre extension competition, Orléans, 2006.
 - E. Bonabeau, M. Dorigo, G. Theraulaz, *Swarm Intelligence: From Natural to Artificial Systems* (Oxford, 1999) — for stigmergy.
 
 ## License
