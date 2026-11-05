@@ -37,7 +37,12 @@ export class Grid {
   }
   idx(x, y) { return y * this.w + x; }
   inBounds(x, y) { return x >= 0 && x < this.w && y >= 0 && y < this.h; }
-  get(x, y) { return this.inBounds(x, y) ? this.cells[this.idx(x, y)] : SOLID; } // out of bounds reads SOLID (walls/floor)
+  // Out of bounds: the side walls and the floor read SOLID (they can bear
+  // material), the sky above reads EMPTY (nothing attaches to it).
+  get(x, y) {
+    if (y < 0) return EMPTY;
+    return this.inBounds(x, y) ? this.cells[this.idx(x, y)] : SOLID;
+  }
   set(x, y, v) { if (this.inBounds(x, y)) this.cells[this.idx(x, y)] = v; }
   isSolid(x, y) { return this.get(x, y) === SOLID; }
 
