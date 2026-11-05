@@ -28,7 +28,7 @@ The result is open-ended. Unlike a blueprint, there is no target form; the struc
 A cell may be deposited at `(x, y)` only when all three hold ([`docs/viab.js`](docs/viab.js)):
 
 - **Attachable** — it touches existing material (`isAttachable`).
-- **Supported** — it is on the ground, rests on a solid cell directly below, or cantilevers no more than `L` contiguous cells from a column that is itself supported (`isSupported`). Depositing only ever adds material, and each of these conditions is monotonic under adding material, so a cell that is supported when placed stays supported forever. That is how "no floating material" is guaranteed rather than hoped for.
+- **Supported** — it is on the ground, rests on a solid cell directly below, or cantilevers no more than `L` contiguous cells from a column that is itself supported (`isSupported`). Depositing only ever adds material, and each of these conditions is monotonic under adding material, so a cell that is supported when placed stays supported forever. That is how "no floating material" is guaranteed.
 - **Non-sealing** — it must not leave any neighbouring void fully enclosed, so the structure stays porous and climbable (`trafficOk`).
 
 In the live demo the **viability overlay** tints every attachment site: green where a deposit is allowed, red where the rule refuses it (an over-cantilever or a deposit that would strand a void).

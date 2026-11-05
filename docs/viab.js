@@ -205,7 +205,7 @@ export function createState(params) {
   const agents = [];
   for (let i = 0; i < p.agents; i++) {
     // Spread the agents along the ground, so growth starts as several local
-    // fronts rather than one central pile.
+    // fronts instead of one central pile.
     agents.push(new Agent(Math.floor(p.w * (i + 0.5) / p.agents), p.h - 2));
   }
   return { p, grid, rng, agents, t: 0, deposits: 0, lastHumour: humourAt(0, p.seed) };
