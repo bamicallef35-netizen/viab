@@ -45,6 +45,8 @@ export class Grid {
   }
   set(x, y, v) { if (this.inBounds(x, y)) this.cells[this.idx(x, y)] = v; }
   isSolid(x, y) { return this.get(x, y) === SOLID; }
+  // Deposited material: solid, in bounds, and above the floor row.
+  isDeposited(x, y) { return this.inBounds(x, y) && y < this.h - 1 && this.cells[this.idx(x, y)] === SOLID; }
 
   // Stable FNV-1a 64 (as two 32-bit halves) over the cells — for determinism
   // tests. Returns a hex string.
@@ -90,11 +92,13 @@ export function isSupported(grid, x, y, L) {
 // ── Local deposition rules ────────────────────────────────────────────────
 const N4 = [[0, -1], [0, 1], [-1, 0], [1, 0]];
 
-// A cell may only be added touching existing material (a seed-adjacent, local
-// rule — an agent cannot teleport a brick into empty space).
+// A cell may only be added touching material that was deposited — a local
+// rule, as in TERMES, where bricks go next to bricks. The floor and the walls
+// bear weight but are not material to build on, so growth starts from the
+// seeds and spreads outward and upward from them.
 export function isAttachable(grid, x, y) {
   if (grid.get(x, y) !== EMPTY) return false;
-  for (const [dx, dy] of N4) if (grid.isSolid(x + dx, y + dy)) return true;
+  for (const [dx, dy] of N4) if (grid.isDeposited(x + dx, y + dy)) return true;
   return false;
 }
 
@@ -199,7 +203,7 @@ function isSurface(grid, x, y) {
 // ── Simulation ────────────────────────────────────────────────────────────
 export function defaultParams() {
   return {
-    w: 80, h: 48, L: 4, agents: 30, ticks: 2600, seed: 1,
+    w: 80, h: 48, L: 4, agents: 30, seeds: 4, ticks: 2600, seed: 1,
     perceive: 2, // Chebyshev radius an agent can see/reach
     weights: { base: -0.3, stress: 1.6, calm: 1.2, reach: 3.4, calmFill: 3.0, crowding: 1.0, height: 1.5, repulsion: 1.8 },
   };
@@ -208,7 +212,9 @@ export function defaultParams() {
 export function createState(params) {
   const p = Object.assign(defaultParams(), params || {});
   const grid = new Grid(p.w, p.h);
-  grid.set(Math.floor(p.w / 2), p.h - 2, SOLID);   // a seed cell on the ground
+  // Seed cells along the ground: growth can only start from deposited
+  // material, so these are where the forms begin.
+  for (let k = 1; k <= p.seeds; k++) grid.set(Math.floor(p.w * k / (p.seeds + 1)), p.h - 2, SOLID);
   const rng = mulberry32(p.seed);
   const agents = [];
   for (let i = 0; i < p.agents; i++) {
