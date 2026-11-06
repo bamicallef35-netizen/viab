@@ -17,8 +17,10 @@ test("the sheet is a well-formed SVG carrying the record and the rules", () => {
 });
 
 test("a compact tile carries the section and no title block", async () => {
-  const { run } = await import("../docs/viab.js");
+  const { createState, step } = await import("../docs/viab.js");
   const { sectionSheet } = await import("../docs/sheet.js");
-  const tile = sectionSheet(run({ seed: 2, material: 200, w: 40, h: 24 }), { compact: true, cell: 3 });
+  const state = createState({ seed: 2, material: 200, w: 40, h: 24 });
+  for (let i = 0; i < 3000 && !state.finished; i++) step(state);
+  const tile = sectionSheet(state, { compact: true, cell: 3 });
   assert.ok(tile.startsWith("<svg") && tile.includes("<rect") && !tile.includes("procedure") && !tile.includes("10 units"));
 });
