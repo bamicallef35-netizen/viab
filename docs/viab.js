@@ -153,9 +153,9 @@ export function humourAt(t, seed) {
 function sigmoid(z) { return 1 / (1 + Math.exp(-z)); }
 
 // Score an attachable candidate under the current humour. Stress favours
-// thick, enclosing growth; calm favours reach — it cantilevers outward and
-// declines to fill the cells beneath, so calm phases build lace that stress
-// phases later fill in; crowding draws
+// thick, enclosing growth; calm favours reach — it cantilevers outward, stacks
+// thin, and declines to infill crowded sites, so calm phases build lace that
+// stress phases later fill in; crowding draws
 // deposition toward already-dense regions; repulsion suppresses a drifting
 // column, so the form leans away from it.
 export function biasScore(grid, x, y, humour, params) {
@@ -174,7 +174,7 @@ export function biasScore(grid, x, y, humour, params) {
     w.stress * humour.stress * enclosure +            // stress fills in, solid
     w.calm * humour.calm * (1 - enclosure) +
     w.reach * humour.calm * reach -                   // calm opens out, cantilevered
-    w.calmFill * humour.calm * (1 - reach) +          // ...and declines to fill under itself
+    w.calmFill * humour.calm * enclosure +            // ...and declines to infill crowded sites
     w.crowding * humour.crowding * enclosure +
     w.height * height -
     w.repulsion * repel
