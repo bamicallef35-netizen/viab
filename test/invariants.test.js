@@ -1,7 +1,7 @@
 // The headline guarantees: no floating material ever, and full reproducibility.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { run, createState, step, invariantHolds } from "../docs/viab.js";
+import { run, createState, step, invariantHolds, defaultParams } from "../docs/viab.js";
 
 const SMALL = { w: 48, h: 30, agents: 12, ticks: 500 };
 
@@ -9,7 +9,7 @@ test("support invariant holds after a full run, across many seeds", () => {
   for (let seed = 1; seed <= 30; seed++) {
     const { grid, metrics } = run({ ...SMALL, seed });
     assert.equal(metrics.invariant, true, `seed ${seed} left floating material`);
-    assert.equal(invariantHolds(grid, 3), true);
+    assert.equal(invariantHolds(grid, defaultParams().L), true);   // the run's own cantilever limit
   }
 });
 
