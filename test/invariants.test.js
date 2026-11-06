@@ -52,3 +52,11 @@ test("agent count is conserved across the run", () => {
   for (let i = 0; i < 100; i++) step(state);
   assert.equal(state.agents.length, n);
 });
+
+test("a finite material budget ends the run as a finished section", () => {
+  const state = createState({ ...SMALL, seed: 11, material: 150 });
+  for (let i = 0; i < 4000 && !state.finished; i++) step(state);
+  assert.equal(state.finished, true);
+  assert.equal(state.grid.solidCount(), 150);
+  assert.equal(invariantHolds(state.grid, state.p.L), true);
+});

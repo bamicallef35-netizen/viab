@@ -40,10 +40,11 @@
       </div>
       <div class="group">
         <button id="overlay" aria-pressed="true">viability overlay</button>
+        <button id="sheet" aria-pressed="false">export sheet</button>
       </div>
     </div>
     <div class="readout" id="readout">
-      <span class="k">cells</span> <span id="cells">0</span>
+      <span class="k">material</span> <span id="cells">0</span> <span class="k">of</span> <span id="budget">0</span>
       &nbsp; <span class="k">max overhang</span> <span id="overhang">0</span>
       &nbsp; <span class="k">support invariant</span> <span id="inv">ok</span>
       &nbsp; <span class="k">tick</span> <span id="tick">0</span>
@@ -52,7 +53,7 @@
       <span class="k">calm</span><span class="bar"><i id="h-calm"></i></span>
       <span class="k">crowding</span><span class="bar"><i id="h-crowd"></i></span>
     </div>
-    <figcaption>agents walk the surface and deposit only where the local rules allow. grey marks a site where a deposit is permitted; blue marks one the viability rule refuses. hold the humours on stress and the forms thicken; on calm they reach out and climb thin.</figcaption>
+    <figcaption>a section. agents walk the surface and deposit only where the local rules allow, until the material runs out. grey marks a site where a deposit is permitted; blue marks one the viability rule refuses. hold the humours on stress and the forms thicken; on calm they reach out and climb thin. export sheet downloads the drawing with its title block.</figcaption>
   </figure>
 
   <section class="text">
@@ -66,6 +67,7 @@
 
 <script type="module">
 import { createState, step, SOLID, EMPTY, isAttachable, isViable, maxOverhang, invariantHolds } from "./viab.js";
+import { sectionSheet } from "./sheet.js";
 
 const cv = document.getElementById("c"), ctx = cv.getContext("2d"), stage = document.getElementById("stage");
 const css = getComputedStyle(document.documentElement);
@@ -76,7 +78,7 @@ const ui = { cells: document.getElementById("cells"), tick: document.getElementB
   hStress: document.getElementById("h-stress"), hCalm: document.getElementById("h-calm"), hCrowd: document.getElementById("h-crowd") };
 let state = null, running = true, speed = 4, overlay = true, seed = 1;
 
-function build() { state = createState({ seed }); }
+function build() { state = createState({ seed }); document.getElementById("budget").textContent = state.p.material; }
 function fit() {
   const r = stage.getBoundingClientRect();
   cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
@@ -129,6 +131,13 @@ document.getElementById("humours").addEventListener("click", (e) => {
   const mode = b.dataset.h;
   state.override = mode === "stress" ? { stress: 1, calm: 0 } : mode === "calm" ? { stress: 0, calm: 1 } : null;
   e.currentTarget.querySelectorAll("button").forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
+});
+document.getElementById("sheet").addEventListener("click", () => {
+  const svg = sectionSheet(state, { invariant: invariantHolds(state.grid, state.p.L) });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+  a.download = `viab-section-seed${seed}-t${state.t}.svg`;
+  a.click(); URL.revokeObjectURL(a.href);
 });
 const ovBtn = document.getElementById("overlay");
 ovBtn.addEventListener("click", () => { overlay = !overlay; ovBtn.setAttribute("aria-pressed", String(overlay)); });

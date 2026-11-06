@@ -213,6 +213,7 @@ function frontier(grid) {
 export function defaultParams() {
   return {
     w: 80, h: 48, L: 4, agents: 30, seeds: 4, ticks: 2600, seed: 1,
+    material: 1400, // units of material available; the run finishes when it is spent
     perceive: 2, // Chebyshev radius an agent can see/reach
     patience: 40, // ticks without a deposit before an agent moves to another face
     weights: { base: -0.3, stress: 1.6, calm: 1.2, reach: 3.4, calmFill: 3.0, crowding: 1.0, height: 1.5, repulsion: 1.8 },
@@ -233,7 +234,7 @@ export function createState(params) {
     const [fx, fy] = f[i % f.length];
     agents.push(new Agent(fx, fy));
   }
-  return { p, grid, rng, agents, t: 0, deposits: 0, lastHumour: humourAt(0, p.seed), override: null };
+  return { p, grid, rng, agents, t: 0, deposits: 0, lastHumour: humourAt(0, p.seed), override: null, finished: false };
 }
 
 function localCandidates(grid, ax, ay, radius, L) {
@@ -249,6 +250,8 @@ function localCandidates(grid, ax, ay, radius, L) {
 
 export function step(state) {
   const { p, grid, rng, agents } = state;
+  let used = grid.solidCount();
+  if (p.material && used >= p.material) { state.finished = true; return state; }
   // The viewer may hold the humours (an "architecture of humours" you can
   // push on); otherwise the seeded stream runs, and the run stays
   // deterministic.
@@ -265,8 +268,9 @@ export function step(state) {
       while (k < exps.length - 1 && (pick -= exps[k]) > 0) k++;
       const [cx, cy] = cands[k];
       if (rng() < sigmoid(scores[k])) {
+        if (p.material && used >= p.material) { state.finished = true; break; }
         grid.set(cx, cy, SOLID);
-        state.deposits++;
+        state.deposits++; used++;
         a.idle = 0;
       }
     }
