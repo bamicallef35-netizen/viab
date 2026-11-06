@@ -193,11 +193,20 @@ export class Agent {
   constructor(x, y) { this.x = x; this.y = y; }
 }
 
-// Is (x, y) a place an agent can stand: empty, and resting on/against solid.
+// Is (x, y) a place an agent can stand: empty, and touching deposited
+// material — agents crawl the structure, as TERMES robots climb theirs, so
+// they reach the sites high up where the next deposit is allowed.
 function isSurface(grid, x, y) {
   if (grid.get(x, y) !== EMPTY) return false;
-  for (const [dx, dy] of N4) if (grid.isSolid(x + dx, y + dy)) return true;
+  for (const [dx, dy] of N4) if (grid.isDeposited(x + dx, y + dy)) return true;
   return false;
+}
+
+// Every standable cell on the structure's frontier, for respawning agents.
+function frontier(grid) {
+  const out = [];
+  for (let y = 0; y < grid.h - 1; y++) for (let x = 0; x < grid.w; x++) if (isSurface(grid, x, y)) out.push([x, y]);
+  return out;
 }
 
 // ── Simulation ────────────────────────────────────────────────────────────
@@ -217,10 +226,11 @@ export function createState(params) {
   for (let k = 1; k <= p.seeds; k++) grid.set(Math.floor(p.w * k / (p.seeds + 1)), p.h - 2, SOLID);
   const rng = mulberry32(p.seed);
   const agents = [];
+  // Agents start beside the seeds, spread evenly among them.
+  const f = frontier(grid);
   for (let i = 0; i < p.agents; i++) {
-    // Spread the agents along the ground, so growth starts as several local
-    // fronts instead of one central pile.
-    agents.push(new Agent(Math.floor(p.w * (i + 0.5) / p.agents), p.h - 2));
+    const [fx, fy] = f[i % f.length];
+    agents.push(new Agent(fx, fy));
   }
   return { p, grid, rng, agents, t: 0, deposits: 0, lastHumour: humourAt(0, p.seed), override: null };
 }
@@ -267,9 +277,9 @@ export function step(state) {
       const [mx, my] = moves[Math.floor(rng() * moves.length)];
       a.x = mx; a.y = my;
     } else {
-      // Stuck (walled in): rejoin the frontier somewhere else along the width.
-      a.x = Math.floor(rng() * p.w);
-      a.y = p.h - 2;
+      // Stuck (walled in): rejoin the frontier somewhere else on the structure.
+      const f = frontier(grid);
+      if (f.length) { const [fx, fy] = f[Math.floor(rng() * f.length)]; a.x = fx; a.y = fy; }
     }
   }
   state.t++;
