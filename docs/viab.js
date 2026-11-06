@@ -190,7 +190,7 @@ export function biasScore(grid, x, y, humour, params) {
 // the viable candidates there, and may deposit one; then it steps to an
 // adjacent surface cell. It never inspects another agent — only the grid.
 export class Agent {
-  constructor(x, y) { this.x = x; this.y = y; }
+  constructor(x, y) { this.x = x; this.y = y; this.idle = 0; }
 }
 
 // Is (x, y) a place an agent can stand: empty, and touching deposited
@@ -214,6 +214,7 @@ export function defaultParams() {
   return {
     w: 80, h: 48, L: 4, agents: 30, seeds: 4, ticks: 2600, seed: 1,
     perceive: 2, // Chebyshev radius an agent can see/reach
+    patience: 40, // ticks without a deposit before an agent moves to another face
     weights: { base: -0.3, stress: 1.6, calm: 1.2, reach: 3.4, calmFill: 3.0, crowding: 1.0, height: 1.5, repulsion: 1.8 },
   };
 }
@@ -266,7 +267,18 @@ export function step(state) {
       if (rng() < sigmoid(scores[k])) {
         grid.set(cx, cy, SOLID);
         state.deposits++;
+        a.idle = 0;
       }
+    }
+    a.idle++;
+    // Growth happens in islands: an agent that has found nothing to do for a
+    // while leaves for another part of the frontier, as a construction robot
+    // would move on from a finished face.
+    if (a.idle > p.patience) {
+      const f = frontier(grid);
+      if (f.length) { const [fx, fy] = f[Math.floor(rng() * f.length)]; a.x = fx; a.y = fy; }
+      a.idle = 0;
+      continue;
     }
     // Step to a surface neighbour (seeded); respawn near the seed if stuck.
     const moves = [];
