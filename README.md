@@ -4,6 +4,8 @@ A browser toy of decentralized, stigmergic construction under a viability constr
 
 **[▶ Live demo](https://benmicallef.github.io/viab/)**
 
+![A finished section, seed 7: the drawing sheet the generator exports](media/sheet.svg)
+
 ![Four moments of one run: growth from four seeds, with the sites the viability rule refuses in blue](media/plate.svg)
 
 *One run at four moments. Calm phases reach outward and climb thin; stress phases fill beneath. Blue marks where the cantilever limit refuses a deposit. Drawn by `tools/plate.js` from the model's own grid.*
