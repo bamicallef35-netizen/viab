@@ -222,7 +222,7 @@ export function createState(params) {
     // fronts instead of one central pile.
     agents.push(new Agent(Math.floor(p.w * (i + 0.5) / p.agents), p.h - 2));
   }
-  return { p, grid, rng, agents, t: 0, deposits: 0, lastHumour: humourAt(0, p.seed) };
+  return { p, grid, rng, agents, t: 0, deposits: 0, lastHumour: humourAt(0, p.seed), override: null };
 }
 
 function localCandidates(grid, ax, ay, radius, L) {
@@ -238,7 +238,10 @@ function localCandidates(grid, ax, ay, radius, L) {
 
 export function step(state) {
   const { p, grid, rng, agents } = state;
-  const humour = humourAt(state.t, p.seed);
+  // The viewer may hold the humours (an "architecture of humours" you can
+  // push on); otherwise the seeded stream runs, and the run stays
+  // deterministic.
+  const humour = state.override ? Object.assign(humourAt(state.t, p.seed), state.override) : humourAt(state.t, p.seed);
   state.lastHumour = humour;
   for (const a of agents) {
     const cands = localCandidates(grid, a.x, a.y, p.perceive, p.L);

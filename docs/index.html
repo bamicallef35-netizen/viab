@@ -32,6 +32,12 @@
         <span class="lbl">speed</span>
         <input type="range" id="speed" min="1" max="12" step="1" value="4">
       </div>
+      <div class="group" id="humours">
+        <span class="lbl">humours</span>
+        <button data-h="auto" aria-pressed="true">stream</button>
+        <button data-h="stress" aria-pressed="false">stress</button>
+        <button data-h="calm" aria-pressed="false">calm</button>
+      </div>
       <div class="group">
         <button id="overlay" aria-pressed="true">viability overlay</button>
       </div>
@@ -46,7 +52,7 @@
       <span class="k">calm</span><span class="bar"><i id="h-calm"></i></span>
       <span class="k">crowding</span><span class="bar"><i id="h-crowd"></i></span>
     </div>
-    <figcaption>agents walk the surface and deposit only where the local rules allow. grey marks a site where a deposit is permitted; blue marks one the viability rule refuses.</figcaption>
+    <figcaption>agents walk the surface and deposit only where the local rules allow. grey marks a site where a deposit is permitted; blue marks one the viability rule refuses. hold the humours on stress and the forms thicken; on calm they reach out and climb thin.</figcaption>
   </figure>
 
   <section class="text">
@@ -118,6 +124,12 @@ const seedInput = document.getElementById("seed");
 seedInput.addEventListener("change", () => { seed = Math.max(1, parseInt(seedInput.value) || 1); build(); });
 document.getElementById("newseed").addEventListener("click", () => { seed = (seed % 9999) + 1; seedInput.value = seed; build(); });
 document.getElementById("speed").addEventListener("input", (e) => { speed = parseInt(e.target.value); });
+document.getElementById("humours").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const mode = b.dataset.h;
+  state.override = mode === "stress" ? { stress: 1, calm: 0 } : mode === "calm" ? { stress: 0, calm: 1 } : null;
+  e.currentTarget.querySelectorAll("button").forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
+});
 const ovBtn = document.getElementById("overlay");
 ovBtn.addEventListener("click", () => { overlay = !overlay; ovBtn.setAttribute("aria-pressed", String(overlay)); });
 window.addEventListener("resize", fit);

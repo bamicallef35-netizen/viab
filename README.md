@@ -4,6 +4,10 @@ A browser toy of decentralized, stigmergic construction under a viability constr
 
 **[▶ Live demo](https://benmicallef.github.io/viab/)**
 
+![Four moments of one run: growth from four seeds, with the sites the viability rule refuses in blue](media/plate.svg)
+
+*One run at four moments. Calm phases reach outward and climb thin; stress phases fill beneath. Blue marks where the cantilever limit refuses a deposit. Drawn by `tools/plate.js` from the model's own grid.*
+
 ## What it is
 
 Many simple agents walk the surface of a growing structure on a 2-D lattice. Each one perceives only a small patch around itself, deposits at most one cell per step if local rules allow, then steps to a neighbouring surface cell. No agent ever reads another agent's state. The only thing they share is the structure they are building, so all coordination happens through the material — stigmergy. A deposition is allowed only where it stays *viable*: attached to existing material, supported (on the ground, resting on the cell below, or cantilevered no further than a fixed limit), and without sealing a void. A synthetic humours signal leans the growth — stress toward dense enclosure, calm toward open reach — but never overrides the viability rule.
@@ -31,7 +35,7 @@ A cell may be deposited at `(x, y)` only when all three hold ([`docs/viab.js`](d
 - **Supported** — it is on the ground, rests on a solid cell directly below, or cantilevers no more than `L` contiguous cells from a column that is itself supported (`isSupported`). The lattice's side walls and floor count as solid; the sky does not. Depositing only ever adds material, and each of these conditions is monotonic under adding material, so a cell that is supported when placed stays supported forever. That is how "no floating material" is guaranteed.
 - **Non-sealing** — it must not leave any neighbouring void fully enclosed, so the structure stays porous and climbable (`trafficOk`).
 
-In the live demo the **viability overlay** tints every attachment site: green where a deposit is allowed, red where the rule refuses it (an over-cantilever or a deposit that would strand a void).
+In the live demo the **viability overlay** tints every attachment site: grey where a deposit is allowed, blue where the rule refuses it (an over-cantilever or a deposit that would strand a void). The humours can be held on stress or calm by the viewer, or left to the seeded stream.
 
 ## Determinism and tests
 
