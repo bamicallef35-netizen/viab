@@ -1,7 +1,7 @@
 // The headline guarantees: no floating material ever, and full reproducibility.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { run, createState, step, invariantHolds, defaultParams } from "../docs/viab.js";
+import { run, createState, step, invariantHolds, defaultParams, isReserved } from "../docs/viab.js";
 
 const SMALL = { w: 48, h: 30, agents: 12, ticks: 500 };
 
@@ -59,4 +59,15 @@ test("a finite material budget ends the run as a finished section", () => {
   assert.equal(state.finished, true);
   assert.equal(state.grid.solidCount(), 150);
   assert.equal(invariantHolds(state.grid, state.p.L), true);
+});
+
+test("reserved chambers are never filled: the programme holds", () => {
+  for (const seed of [1, 2, 3]) {
+    const state = createState({ ...SMALL, seed, chambers: 4 });
+    assert.ok(state.grid.chambers.length === 4);
+    for (let i = 0; i < 800; i++) step(state);
+    for (let y = 0; y < state.grid.h - 1; y++) for (let x = 0; x < state.grid.w; x++) {
+      if (isReserved(state.grid, x, y)) assert.equal(state.grid.get(x, y), 0, `seed ${seed}: material in a chamber at ${x},${y}`);
+    }
+  }
 });

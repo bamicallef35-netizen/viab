@@ -11,6 +11,7 @@ test("the sheet is a well-formed SVG carrying the record and the rules", () => {
   assert.ok(svg.startsWith("<svg"));
   assert.ok(svg.includes("seed 5 / tick 300"));
   assert.ok(svg.includes("10 units"));
-  assert.ok(svg.includes("viability constraint"));
+  assert.ok(svg.includes("units of support"));          // the procedure row states the rules
+  assert.ok(svg.includes("chambers"));                  // the programme row names the reserved voids
   assert.ok((svg.match(/<rect/g) || []).length > grid.solidCount());
 });

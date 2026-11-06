@@ -120,8 +120,15 @@ export function trafficOk(grid, x, y) {
   return true;
 }
 
+// A reserved chamber cell: the programme says no material goes here.
+export function isReserved(grid, x, y) {
+  if (!grid.chambers) return false;
+  for (const c of grid.chambers) if ((x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) <= c.r * c.r) return true;
+  return false;
+}
+
 export function isViable(grid, x, y, L) {
-  return isAttachable(grid, x, y) && isSupported(grid, x, y, L) && trafficOk(grid, x, y);
+  return !isReserved(grid, x, y) && isAttachable(grid, x, y) && isSupported(grid, x, y, L) && trafficOk(grid, x, y);
 }
 
 // The horizontal overhang of a solid cell: contiguous solids to each side with
@@ -214,6 +221,7 @@ export function defaultParams() {
   return {
     w: 80, h: 48, L: 4, agents: 30, seeds: 4, ticks: 2600, seed: 1,
     material: 1400, // units of material available; the run finishes when it is spent
+    chambers: 6,    // voids reserved by the scenario; material grows around them
     perceive: 2, // Chebyshev radius an agent can see/reach
     patience: 40, // ticks without a deposit before an agent moves to another face
     weights: { base: -0.3, stress: 1.6, calm: 1.2, reach: 3.4, calmFill: 3.0, crowding: 1.0, height: 1.5, repulsion: 1.8 },
@@ -223,6 +231,16 @@ export function defaultParams() {
 export function createState(params) {
   const p = Object.assign(defaultParams(), params || {});
   const grid = new Grid(p.w, p.h);
+  // Chambers: voids the scenario reserves for its inhabitants, placed by the
+  // seeded stream and never filled. Material accretes around them, so the
+  // section reads as rooms inside a mass. They are the programme.
+  const crng = mulberry32((p.seed * 7919) >>> 0);
+  grid.chambers = [];
+  for (let k = 0; k < p.chambers; k++) {
+    const r = 2 + Math.floor(crng() * 3);
+    const cx = r + 2 + Math.floor(crng() * (p.w - 2 * r - 4)), cy = p.h - 3 - r - Math.floor(crng() * Math.max(1, p.h * 0.45));
+    grid.chambers.push({ x: cx, y: cy, r });
+  }
   // Seed cells along the ground: growth can only start from deposited
   // material, so these are where the forms begin.
   for (let k = 1; k <= p.seeds; k++) grid.set(Math.floor(p.w * k / (p.seeds + 1)), p.h - 2, SOLID);

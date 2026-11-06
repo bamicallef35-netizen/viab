@@ -21,6 +21,7 @@ export function sectionSheet(state, opts = {}) {
       body += `<rect x="${X}" y="${Y}" width="${cell}" height="${cell}" fill="${ACCENT}" fill-opacity="0.45"/>`;
   }
   body += `<rect x="${pad}" y="${pad + (g.h - 1) * cell}" width="${gw}" height="${cell}" fill="${INK}"/>`;   // ground
+  for (const c of g.chambers || []) body += `<circle cx="${pad + (c.x + 0.5) * cell}" cy="${pad + (c.y + 0.5) * cell}" r="${(c.r + 0.5) * cell}" fill="none" stroke="${INK2}" stroke-dasharray="3 3"/>`;
   // scale bar: ten cells
   const sbY = pad + gh + 22;
   body += `<line x1="${pad}" y1="${sbY}" x2="${pad + 10 * cell}" y2="${sbY}" stroke="${INK}" stroke-width="2"/>`;
@@ -31,7 +32,7 @@ export function sectionSheet(state, opts = {}) {
   const ty = pad + gh + 54;
   const rows = [
     ["project", "viab — a section through a stigmergic accretion"],
-    ["programme", "material deposited by local rule under a viability constraint; no target form"],
+    ["programme", `${(g.chambers || []).length} chambers reserved for inhabitants; material accretes around them by local rule, no target form`],
     ["area", `${g.w} × ${g.h} units; material ${budget} units`],
     ["procedure", `attach to deposited material; rest within ${p.L} units of support; seal no void; humours ${mode} (stress ${(h.stress * 100).toFixed(0)}%)`],
     ["record", `seed ${p.seed} / tick ${state.t} / deposits ${state.deposits} / invariant ${opts.invariant === false ? "broken" : "held"}`],

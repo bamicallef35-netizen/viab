@@ -53,7 +53,7 @@
       <span class="k">calm</span><span class="bar"><i id="h-calm"></i></span>
       <span class="k">crowding</span><span class="bar"><i id="h-crowd"></i></span>
     </div>
-    <figcaption>a section. agents walk the surface and deposit only where the local rules allow, until the material runs out. grey marks a site where a deposit is permitted; blue marks one the viability rule refuses. hold the humours on stress and the forms thicken; on calm they reach out and climb thin. export sheet downloads the drawing with its title block.</figcaption>
+    <figcaption>a section. dashed circles are chambers the scenario reserves for its inhabitants; material accretes around them. agents walk the surface and deposit only where the local rules allow, until the material runs out. grey marks a site where a deposit is permitted; blue marks one the viability rule refuses. hold the humours on stress and the forms thicken; on calm they reach out and climb thin. export sheet downloads the drawing with its title block.</figcaption>
   </figure>
 
   <section class="text">
@@ -93,6 +93,10 @@ function draw() {
   ctx.strokeRect(ox + 0.5, oy + 0.5, g.w * s, g.h * s);
   // ground
   ctx.fillStyle = INK; ctx.fillRect(ox, oy + (g.h - 1) * s, g.w * s, s);
+  // chambers: the programme's reserved voids
+  ctx.strokeStyle = INK2; ctx.setLineDash([3, 3]);
+  for (const c of g.chambers || []) { ctx.beginPath(); ctx.arc(ox + (c.x + 0.5) * s, oy + (c.y + 0.5) * s, (c.r + 0.5) * s, 0, 7); ctx.stroke(); }
+  ctx.setLineDash([]);
   if (overlay) {
     for (let y = 0; y < g.h - 1; y++) for (let x = 0; x < g.w; x++) {
       if (g.get(x, y) !== EMPTY || !isAttachable(g, x, y)) continue;
