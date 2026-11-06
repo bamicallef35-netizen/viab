@@ -6,6 +6,10 @@ A browser toy of decentralized, stigmergic construction under a viability constr
 
 ![A finished section, seed 7: the drawing sheet the generator exports](media/sheet.svg)
 
+`node tools/humours-sheet.js` draws nine finished sections, three seeds under three humours — the seeded stream, stress held, calm held — from the same material under the same rules. The difference between the columns is the whole effect of the humours signal.
+
+![Nine sections: three seeds under three humours](media/humours.svg)
+
 ![Four moments of one run: growth from four seeds, with the sites the viability rule refuses in blue](media/plate.svg)
 
 *One run at four moments. Calm phases reach outward and climb thin; stress phases fill beneath. Blue marks where the cantilever limit refuses a deposit. Drawn by `tools/plate.js` from the model's own grid.*
