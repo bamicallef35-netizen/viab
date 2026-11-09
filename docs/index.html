@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>viab / Benjamin Micallef</title>
+<meta name="description" content="Decentralized, stigmergic construction under a viability constraint, steered by a synthetic humours stream. After TERMES (2014) and R&Sie(n) (2005, 2010).">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main>
+  <header class="site">
+    <h1>viab</h1>
+    <p class="meta">stigmergic accretion under a viability constraint / mechanism after TERMES, Werfel, Petersen &amp; Nagpal, 2014 / name and premise after R&amp;Sie(n), <em>I've heard about…</em> (2005) and <em>Une architecture des humeurs</em> (2010) / <a href="https://github.com/bamicallef35-netizen/viab">source</a> / <a href="https://benmicallef-site.vercel.app/">benmicallef</a></p>
+  </header>
+
+  <figure class="demo">
+    <div class="stage" id="stage" style="aspect-ratio: 5 / 3;">
+      <canvas id="c" aria-label="a lattice on which agents deposit material"></canvas>
+    </div>
+    <div class="controls">
+      <div class="group">
+        <button id="playPause" aria-pressed="true">running</button>
+        <button id="reset" aria-pressed="false">reset</button>
+      </div>
+      <div class="group">
+        <span class="lbl">seed</span>
+        <input type="number" id="seed" value="1" min="1" step="1">
+        <button id="newseed" aria-pressed="false">new seed</button>
+      </div>
+      <div class="group">
+        <span class="lbl">speed</span>
+        <input type="range" id="speed" min="1" max="12" step="1" value="4">
+      </div>
+      <div class="group" id="humours">
+        <span class="lbl">humours</span>
+        <button data-h="auto" aria-pressed="true">stream</button>
+        <button data-h="stress" aria-pressed="false">stress</button>
+        <button data-h="calm" aria-pressed="false">calm</button>
+      </div>
+      <div class="group">
+        <button id="overlay" aria-pressed="true">viability overlay</button>
+        <button id="sheet" aria-pressed="false">export sheet</button>
+      </div>
+    </div>
+    <div class="readout" id="readout">
+      <span class="k">material</span> <span id="cells">0</span> <span class="k">of</span> <span id="budget">0</span>
+      &nbsp; <span class="k">max overhang</span> <span id="overhang">0</span>
+      &nbsp; <span class="k">support invariant</span> <span id="inv">ok</span>
+      &nbsp; <span class="k">tick</span> <span id="tick">0</span>
+      <br>
+      <span class="k">stress</span><span class="bar"><i id="h-stress"></i></span>
+      <span class="k">calm</span><span class="bar"><i id="h-calm"></i></span>
+      <span class="k">crowding</span><span class="bar"><i id="h-crowd"></i></span>
+    </div>
+    <figcaption>a section. dashed circles are chambers the scenario reserves for its inhabitants; material accretes around them. agents walk the surface and deposit only where the local rules allow, until the material runs out. grey marks a site where a deposit is permitted; blue marks one the viability rule refuses. hold the humours on stress and the forms thicken; on calm they reach out and climb thin. export sheet downloads the drawing with its title block.</figcaption>
+  </figure>
+
+  <section class="text">
+    <p>Many simple agents walk the surface of a growing structure on a 2-D lattice. Each perceives only a small patch around itself, deposits at most one cell per step if the local rules allow, then steps to a neighbouring surface cell. No agent reads another agent's state. The only thing they share is the structure they are building, so coordination happens through the material — stigmergy, the mechanism of the TERMES robots.</p>
+    <p>A deposit is allowed only where it stays viable: attached to existing material, supported (on the ground, on the cell below, or cantilevered no further than a fixed limit), and without sealing a void. Depositing only ever adds material, and every one of those conditions is monotonic under adding material, so a cell that is supported when placed stays supported forever. A synthetic <em>humours</em> signal leans the growth — stress toward dense enclosure, calm toward open reach — and never overrides the rule.</p>
+    <h2>what it is not</h2>
+    <p>TERMES compiles a target structure into local rules offline; this has no target at all. R&amp;Sie(n)'s Viab was imagined as a single secreting machine, not a swarm; the name is borrowed with attribution. Support here is a combinatorial invariant, not statics.</p>
+    <p class="meta">20 deterministic tests / zero dependencies / MIT / <a href="https://github.com/bamicallef35-netizen/viab">README and sources</a></p>
+  </section>
+</main>
+
+<script type="module">
+import { createState, step, SOLID, EMPTY, isAttachable, isViable, maxOverhang, invariantHolds } from "./viab.js";
+import { sectionSheet } from "./sheet.js";
+
+const cv = document.getElementById("c"), ctx = cv.getContext("2d"), stage = document.getElementById("stage");
+const css = getComputedStyle(document.documentElement);
+const INK = css.getPropertyValue("--ink").trim(), INK2 = css.getPropertyValue("--ink-2").trim(), RULE = css.getPropertyValue("--rule").trim();
+const PAPER2 = css.getPropertyValue("--paper-2").trim();
+const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+const ui = { cells: document.getElementById("cells"), tick: document.getElementById("tick"),
+  hStress: document.getElementById("h-stress"), hCalm: document.getElementById("h-calm"), hCrowd: document.getElementById("h-crowd") };
+let state = null, running = true, speed = 4, overlay = true, seed = 1;
+
+function build() { state = createState({ seed }); document.getElementById("budget").textContent = state.p.material; }
+function fit() {
+  const r = stage.getBoundingClientRect();
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function draw() {
+  const g = state.grid, r = stage.getBoundingClientRect(), pad = 14;
+  const s = Math.min((r.width - 2 * pad) / g.w, (r.height - 2 * pad) / g.h);
+  const ox = (r.width - g.w * s) / 2, oy = (r.height - g.h * s) / 2;
+  ctx.clearRect(0, 0, r.width, r.height);
+  ctx.strokeStyle = RULE; ctx.lineWidth = 1;
+  ctx.strokeRect(ox + 0.5, oy + 0.5, g.w * s, g.h * s);
+  // ground
+  ctx.fillStyle = INK; ctx.fillRect(ox, oy + (g.h - 1) * s, g.w * s, s);
+  // chambers: the programme's reserved voids
+  ctx.strokeStyle = INK2; ctx.setLineDash([3, 3]);
+  for (const c of g.chambers || []) { ctx.beginPath(); ctx.arc(ox + (c.x + 0.5) * s, oy + (c.y + 0.5) * s, (c.r + 0.5) * s, 0, 7); ctx.stroke(); }
+  ctx.setLineDash([]);
+  if (overlay) {
+    for (let y = 0; y < g.h - 1; y++) for (let x = 0; x < g.w; x++) {
+      if (g.get(x, y) !== EMPTY || !isAttachable(g, x, y)) continue;
+      ctx.fillStyle = isViable(g, x, y, state.p.L) ? PAPER2 : "rgba(0,0,238,0.35)";
+      ctx.fillRect(ox + x * s, oy + y * s, s, s);
+    }
+  }
+  ctx.fillStyle = INK;
+  for (let y = 0; y < g.h - 1; y++) for (let x = 0; x < g.w; x++) {
+    if (g.get(x, y) === SOLID) ctx.fillRect(ox + x * s, oy + y * s, s + 0.3, s + 0.3);
+  }
+  ctx.strokeStyle = INK; ctx.lineWidth = 1;
+  for (const a of state.agents) {
+    ctx.beginPath(); ctx.arc(ox + (a.x + 0.5) * s, oy + (a.y + 0.5) * s, Math.max(1.6, s * 0.36), 0, 7); ctx.stroke();
+  }
+}
+function readout() {
+  ui.cells.textContent = state.grid.solidCount();
+  ui.tick.textContent = state.t;
+  const h = state.lastHumour;
+  ui.hStress.style.width = (h.stress * 100).toFixed(0) + "%";
+  ui.hCalm.style.width = (h.calm * 100).toFixed(0) + "%";
+  ui.hCrowd.style.width = (h.crowding * 100).toFixed(0) + "%";
+}
+function frame() { if (running) for (let i = 0; i < speed; i++) step(state); draw(); readout(); requestAnimationFrame(frame); }
+
+const playPause = document.getElementById("playPause");
+playPause.addEventListener("click", () => { running = !running; playPause.setAttribute("aria-pressed", String(running)); playPause.textContent = running ? "running" : "paused"; });
+document.getElementById("reset").addEventListener("click", build);
+const seedInput = document.getElementById("seed");
+seedInput.addEventListener("change", () => { seed = Math.max(1, parseInt(seedInput.value) || 1); build(); });
+document.getElementById("newseed").addEventListener("click", () => { seed = (seed % 9999) + 1; seedInput.value = seed; build(); });
+document.getElementById("speed").addEventListener("input", (e) => { speed = parseInt(e.target.value); });
+document.getElementById("humours").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const mode = b.dataset.h;
+  state.override = mode === "stress" ? { stress: 1, calm: 0 } : mode === "calm" ? { stress: 0, calm: 1 } : null;
+  e.currentTarget.querySelectorAll("button").forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
+});
+document.getElementById("sheet").addEventListener("click", () => {
+  const svg = sectionSheet(state, { invariant: invariantHolds(state.grid, state.p.L) });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+  a.download = `viab-section-seed${seed}-t${state.t}.svg`;
+  a.click(); URL.revokeObjectURL(a.href);
+});
+const ovBtn = document.getElementById("overlay");
+ovBtn.addEventListener("click", () => { overlay = !overlay; ovBtn.setAttribute("aria-pressed", String(overlay)); });
+window.addEventListener("resize", fit);
+build(); fit(); requestAnimationFrame(frame);
+setInterval(() => {
+  document.getElementById("overhang").textContent = maxOverhang(state.grid);
+  document.getElementById("inv").textContent = invariantHolds(state.grid, state.p.L) ? "ok" : "BROKEN";
+}, 500);
+</script>
+</body>
+</html>

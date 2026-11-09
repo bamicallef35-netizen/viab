@@ -1,0 +1,16 @@
+{
+  "name": "viab",
+  "version": "0.1.0",
+  "description": "A browser toy of decentralized, stigmergic accretion under a viability constraint — TERMES-style local rules, steered by a synthetic humours stream, after R&Sie(n)'s Viab.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test",
+    "check": "node tools/check.js"
+  },
+  "author": "Ben Micallef",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bamicallef35-netizen/viab"
+  }
+}
